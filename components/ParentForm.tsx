@@ -16,6 +16,80 @@ const Controller = ({ control, name, render, rules }: any) => {
   return render({ field, fieldState });
 };
 
+const SectionCard = ({ title, icon: Icon, children, delay }: { title: string, icon: any, children: React.ReactNode, delay: string }) => (
+  <section 
+    className="bg-white p-6 md:p-8 rounded-3xl shadow-lg shadow-orange-100/50 border border-orange-50 animate-fade-in-up" 
+    style={{ animationDelay: delay }}
+  >
+    <div className="flex items-center gap-3 mb-6 pb-4 border-b border-orange-100">
+      <div className="p-2 bg-orange-100 rounded-lg text-orange-500">
+        <Icon className="w-6 h-6" />
+      </div>
+      <h3 className="text-xl md:text-2xl font-bold text-slate-800">{title}</h3>
+    </div>
+    <div className="space-y-6">
+      {children}
+    </div>
+  </section>
+);
+
+const Label = ({ children, required }: { children: React.ReactNode, required?: boolean }) => (
+  <label className="block text-slate-700 font-bold mb-2 text-base">
+    {children}
+    {required && <span className="text-red-400 ml-1">*</span>}
+  </label>
+);
+
+const Input = (props: React.InputHTMLAttributes<HTMLInputElement> & { error?: string }) => (
+  <div>
+    <input 
+      {...props}
+      className={`
+        w-full px-4 py-3 rounded-xl bg-slate-50 border transition-all outline-none 
+        focus:bg-white focus:ring-2 focus:ring-amber-200 
+        ${props.error ? 'border-red-300' : 'border-slate-200 focus:border-amber-300'}
+      `}
+    />
+    {props.error && <p className="text-red-400 text-sm mt-1 flex items-center"><AlertCircle size={14} className="mr-1"/> {props.error}</p>}
+  </div>
+);
+
+const TextArea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { error?: string }) => (
+  <div>
+    <textarea 
+      {...props}
+      className={`
+        w-full px-4 py-4 rounded-xl bg-slate-50 border transition-all outline-none resize-none
+        focus:bg-yellow-50 focus:ring-2 focus:ring-amber-200
+        ${props.error ? 'border-red-300' : 'border-slate-200 focus:border-amber-300'}
+      `}
+    />
+    {props.error && <p className="text-red-400 text-sm mt-1 flex items-center"><AlertCircle size={14} className="mr-1"/> {props.error}</p>}
+  </div>
+);
+
+const SliderScore = ({ label, value, onChange }: { label: string, value: number, onChange: (val: number) => void }) => (
+  <div className="bg-slate-50 p-5 rounded-xl border border-slate-100">
+    <div className="flex justify-between items-center mb-4">
+      <span className="font-bold text-slate-700">{label}</span>
+      <span className="text-2xl font-extrabold text-amber-500">{value}점</span>
+    </div>
+    <input 
+      type="range" 
+      min="1" 
+      max="10" 
+      value={value} 
+      onChange={(e) => onChange(parseInt(e.target.value))}
+      className="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-500"
+    />
+    <div className="flex justify-between text-xs text-slate-400 mt-2 font-medium">
+      <span>매우 나쁨 (1)</span>
+      <span>보통 (5)</span>
+      <span>매우 좋음 (10)</span>
+    </div>
+  </div>
+);
+
 export const ParentForm: React.FC = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,80 +130,6 @@ export const ParentForm: React.FC = () => {
     setShowSuccessModal(false);
     navigate('/');
   };
-
-  const SectionCard = ({ title, icon: Icon, children, delay }: { title: string, icon: any, children: React.ReactNode, delay: string }) => (
-    <section 
-      className="bg-white p-6 md:p-8 rounded-3xl shadow-lg shadow-orange-100/50 border border-orange-50 animate-fade-in-up" 
-      style={{ animationDelay: delay }}
-    >
-      <div className="flex items-center gap-3 mb-6 pb-4 border-b border-orange-100">
-        <div className="p-2 bg-orange-100 rounded-lg text-orange-500">
-          <Icon className="w-6 h-6" />
-        </div>
-        <h3 className="text-xl md:text-2xl font-bold text-slate-800">{title}</h3>
-      </div>
-      <div className="space-y-6">
-        {children}
-      </div>
-    </section>
-  );
-
-  const Label = ({ children, required }: { children: React.ReactNode, required?: boolean }) => (
-    <label className="block text-slate-700 font-bold mb-2 text-base">
-      {children}
-      {required && <span className="text-red-400 ml-1">*</span>}
-    </label>
-  );
-
-  const Input = (props: React.InputHTMLAttributes<HTMLInputElement> & { error?: string }) => (
-    <div>
-      <input 
-        {...props}
-        className={`
-          w-full px-4 py-3 rounded-xl bg-slate-50 border transition-all outline-none 
-          focus:bg-white focus:ring-2 focus:ring-amber-200 
-          ${props.error ? 'border-red-300' : 'border-slate-200 focus:border-amber-300'}
-        `}
-      />
-      {props.error && <p className="text-red-400 text-sm mt-1 flex items-center"><AlertCircle size={14} className="mr-1"/> {props.error}</p>}
-    </div>
-  );
-
-  const TextArea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { error?: string }) => (
-    <div>
-      <textarea 
-        {...props}
-        className={`
-          w-full px-4 py-4 rounded-xl bg-slate-50 border transition-all outline-none resize-none
-          focus:bg-yellow-50 focus:ring-2 focus:ring-amber-200
-          ${props.error ? 'border-red-300' : 'border-slate-200 focus:border-amber-300'}
-        `}
-      />
-      {props.error && <p className="text-red-400 text-sm mt-1 flex items-center"><AlertCircle size={14} className="mr-1"/> {props.error}</p>}
-    </div>
-  );
-
-  const SliderScore = ({ label, value, onChange }: { label: string, value: number, onChange: (val: number) => void }) => (
-    <div className="bg-slate-50 p-5 rounded-xl border border-slate-100">
-      <div className="flex justify-between items-center mb-4">
-        <span className="font-bold text-slate-700">{label}</span>
-        <span className="text-2xl font-extrabold text-amber-500">{value}점</span>
-      </div>
-      <input 
-        type="range" 
-        min="1" 
-        max="10" 
-        value={value} 
-        onChange={(e) => onChange(parseInt(e.target.value))}
-        className="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-500"
-      />
-      <div className="flex justify-between text-xs text-slate-400 mt-2 font-medium">
-        <span>매우 나쁨 (1)</span>
-        <span>보통 (5)</span>
-        <span>매우 좋음 (10)</span>
-      </div>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-[#FFFBEB] p-4 md:p-8 relative overflow-hidden flex justify-center">

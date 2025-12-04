@@ -4,7 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { auth } from '../firebase';
 import { Loader2 } from 'lucide-react';
 
-export const RequireAuth = ({ children }: { children: React.JSX.Element }) => {
+export const RequireAuth = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -31,5 +31,5 @@ export const RequireAuth = ({ children }: { children: React.JSX.Element }) => {
     return <Navigate to="/admin/login" replace />;
   }
 
-  return children;
+  return <>{children}</>;
 };
