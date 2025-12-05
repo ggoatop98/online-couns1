@@ -16,7 +16,14 @@ const Controller = ({ control, name, render, rules }: any) => {
   return render({ field, fieldState });
 };
 
-const SectionCard = ({ title, icon: Icon, children, delay }: { title: string, icon: any, children: React.ReactNode, delay: string }) => (
+interface SectionCardProps {
+  title: string;
+  icon: any;
+  children: React.ReactNode;
+  delay: string;
+}
+
+const SectionCard: React.FC<SectionCardProps> = ({ title, icon: Icon, children, delay }) => (
   <section 
     className="bg-white p-6 md:p-8 rounded-3xl shadow-lg shadow-orange-100/50 border border-orange-50 animate-fade-in-up" 
     style={{ animationDelay: delay }}
@@ -33,7 +40,12 @@ const SectionCard = ({ title, icon: Icon, children, delay }: { title: string, ic
   </section>
 );
 
-const Label = ({ children, required }: { children: React.ReactNode, required?: boolean }) => (
+interface LabelProps {
+  children: React.ReactNode;
+  required?: boolean;
+}
+
+const Label: React.FC<LabelProps> = ({ children, required }) => (
   <label className="block text-slate-700 font-bold mb-2 text-base">
     {children}
     {required && <span className="text-red-400 ml-1">*</span>}
@@ -97,7 +109,7 @@ export const ParentForm: React.FC = () => {
   
   const { register, handleSubmit, control, formState: { errors } } = useForm<ParentFormData>({
     defaultValues: {
-      relation: '부모',
+      relation: '엄마',
       medicalHistory: '아니오',
       motherRelationScore: 5,
       fatherRelationScore: 5
@@ -140,8 +152,8 @@ export const ParentForm: React.FC = () => {
       <SuccessModal 
         isOpen={showSuccessModal}
         onClose={handleSuccessClose}
-        message="신청이 완료되었습니다!"
-        subMessage="소중한 이야기에 귀 기울이겠습니다."
+        message="신청 완료"
+        subMessage="확인 후 연락드리겠습니다."
       />
 
       <div className="w-full max-w-3xl z-10">
@@ -187,7 +199,7 @@ export const ParentForm: React.FC = () => {
             <div>
               <Label>학생과의 관계</Label>
               <div className="flex gap-4 mt-2">
-                {['부모', '조부모 및 친인척', '기타'].map((rel) => (
+                {['아빠', '엄마'].map((rel) => (
                   <label key={rel} className="flex items-center gap-2 cursor-pointer group">
                     <div className="relative">
                       <input 

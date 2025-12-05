@@ -19,7 +19,13 @@ const Controller = ({ control, name, render, rules }: any) => {
 
 // --- Helper Components ---
 
-const Section = ({ title, icon: Icon, children }: { title: string, icon: any, children: React.ReactNode }) => (
+interface SectionProps {
+  title: string;
+  icon: any;
+  children: React.ReactNode;
+}
+
+const Section: React.FC<SectionProps> = ({ title, icon: Icon, children }) => (
   <section className="bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-purple-50 animate-fade-in-up">
     <div className="flex items-center gap-3 mb-6 pb-4 border-b border-purple-100">
       <div className="p-2 bg-purple-100 rounded-lg text-purple-600">

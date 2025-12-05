@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { 
   LogOut, Smile, Home, BookOpen, Search, Filter, 
   Loader2, MoreHorizontal, Calendar, ArrowRight 
@@ -109,13 +110,26 @@ export const AdminDashboard: React.FC = () => {
               <span className="bg-slate-800 text-white px-3 py-1 rounded-lg font-bold text-sm">ADMIN</span>
               <h1 className="text-xl font-bold text-slate-800">위클래스 관리자</h1>
             </div>
-            <button 
-              onClick={handleLogout}
-              className="flex items-center gap-2 text-slate-500 hover:text-slate-800 font-medium transition-colors text-sm"
-            >
-              <LogOut size={18} />
-              로그아웃
-            </button>
+            
+            <div className="flex items-center gap-4">
+              <Link 
+                to="/"
+                className="flex items-center gap-2 text-slate-500 hover:text-blue-600 font-medium transition-colors text-sm"
+              >
+                <Home size={18} />
+                메인으로
+              </Link>
+              
+              <div className="w-px h-4 bg-slate-200"></div>
+
+              <button 
+                onClick={handleLogout}
+                className="flex items-center gap-2 text-slate-500 hover:text-red-600 font-medium transition-colors text-sm"
+              >
+                <LogOut size={18} />
+                로그아웃
+              </button>
+            </div>
           </div>
         </div>
       </nav>

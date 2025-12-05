@@ -4,7 +4,11 @@ import { Navigate } from 'react-router-dom';
 import { auth } from '../firebase';
 import { Loader2 } from 'lucide-react';
 
-export const RequireAuth = ({ children }: { children: React.ReactNode }) => {
+interface RequireAuthProps {
+  children: React.ReactNode;
+}
+
+export const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
