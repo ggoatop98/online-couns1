@@ -10,9 +10,6 @@ export const Footer: React.FC = () => {
       >
         관리자 페이지로 이동
       </Link>
-      <div className="mt-2 text-xs text-slate-300">
-        © 2024 Solbit Elementary School Wee Class
-      </div>
     </footer>
   );
 };
