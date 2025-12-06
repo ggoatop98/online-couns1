@@ -128,6 +128,17 @@ export const StudentForm: React.FC = () => {
     }
   };
 
+  const onError = (errors: any) => {
+    const missingFields = [];
+    if (errors.name) missingFields.push("이름");
+    if (errors.gradeClass) missingFields.push("학년/반");
+    if (errors.reason) missingFields.push("상담 신청 이유");
+    
+    if (missingFields.length > 0) {
+      alert(`다음 필수 항목이 입력되지 않았습니다:\n\n• ${missingFields.join('\n• ')}`);
+    }
+  };
+
   const handleSuccessClose = () => {
     setShowSuccessModal(false);
     navigate('/');
@@ -162,7 +173,7 @@ export const StudentForm: React.FC = () => {
           </Link>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-6">
           
           {/* Header */}
           <div className="text-center mb-8 animate-fade-in-down">
@@ -287,9 +298,33 @@ export const StudentForm: React.FC = () => {
 
           {/* Section E: Finishing Up */}
           <section className="bg-white/80 backdrop-blur-sm p-6 rounded-3xl shadow-lg border border-white animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
-            <SectionTitle title="마무리" icon={Calendar} />
+            <SectionTitle title="상담 시간은 직접 상담실에 방문해서 상담 선생님과 상의해 주세요. (언제 방문할 수 있나요?*)" icon={Calendar} />
+            
+            {/* The individual labels for date/time were requested to be removed and replaced by the single question above */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="relative">
+                <Calendar className="absolute left-3 top-3 text-slate-400" size={20} />
+                <input 
+                  type="date"
+                  {...register('date')}
+                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-100 outline-none focus:bg-white focus:ring-2 focus:ring-blue-200 focus:border-blue-300 text-slate-600"
+                />
+              </div>
+              <div className="relative">
+                <Clock className="absolute left-3 top-3 text-slate-400" size={20} />
+                <select 
+                  {...register('time')}
+                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-100 outline-none focus:bg-white focus:ring-2 focus:ring-blue-200 focus:border-blue-300 text-slate-600 appearance-none"
+                >
+                  <option value="">시간 선택</option>
+                  <option value="점심시간">점심시간</option>
+                  <option value="방과후">방과후</option>
+                  <option value="수업시간">수업시간 (선생님 허락 필요)</option>
+                </select>
+              </div>
+            </div>
 
-            <div className="mb-8">
+            <div className="mt-8">
               <label className="block text-slate-700 font-bold mb-3">상담 사실을 알려도 되는 사람 (선택)</label>
               <div className="flex flex-wrap gap-3">
                 {['부모님', '담임 선생님', '알리고 싶지 않음'].map((option) => {
@@ -315,34 +350,6 @@ export const StudentForm: React.FC = () => {
                     </label>
                   );
                 })}
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <label className="block text-slate-700 font-bold mb-3 text-sm md:text-base leading-relaxed">
-                상담 시간은 직접 상담실에 방문해서 상담 선생님과 상의해 주세요. <span className="text-red-500 whitespace-nowrap">(언제 방문할 수 있나요?*)</span>
-              </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-3 text-slate-400" size={20} />
-                  <input 
-                    type="date"
-                    {...register('date')}
-                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-100 outline-none focus:bg-white focus:ring-2 focus:ring-blue-200 focus:border-blue-300 text-slate-600"
-                  />
-                </div>
-                <div className="relative">
-                  <Clock className="absolute left-3 top-3 text-slate-400" size={20} />
-                  <select 
-                    {...register('time')}
-                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-100 outline-none focus:bg-white focus:ring-2 focus:ring-blue-200 focus:border-blue-300 text-slate-600 appearance-none"
-                  >
-                    <option value="">시간 선택</option>
-                    <option value="점심시간">점심시간</option>
-                    <option value="방과후">방과후</option>
-                    <option value="수업시간">수업시간 (선생님 허락 필요)</option>
-                  </select>
-                </div>
               </div>
             </div>
           </section>

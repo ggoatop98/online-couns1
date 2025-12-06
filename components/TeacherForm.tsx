@@ -146,6 +146,17 @@ export const TeacherForm: React.FC = () => {
     }
   };
 
+  const onError = (errors: any) => {
+    const missingFields = [];
+    if (errors.studentName) missingFields.push("학생 이름");
+    if (errors.gradeClass) missingFields.push("학년/반");
+    if (errors.referralReason) missingFields.push("의뢰 사유");
+    
+    if (missingFields.length > 0) {
+      alert(`다음 필수 항목이 입력되지 않았습니다:\n\n• ${missingFields.join('\n• ')}`);
+    }
+  };
+
   const handleSuccessClose = () => {
     setShowSuccessModal(false);
     navigate('/');
@@ -185,7 +196,7 @@ export const TeacherForm: React.FC = () => {
           </Link>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 pb-20">
+        <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-8 pb-20">
           
           {/* Header */}
           <div className="text-center mb-10 animate-fade-in-down">
