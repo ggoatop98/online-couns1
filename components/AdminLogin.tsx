@@ -1,6 +1,4 @@
-
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowRight, AlertTriangle, ShieldCheck, Home } from 'lucide-react';
 import { auth } from '../firebase';
@@ -19,7 +17,7 @@ export const AdminLogin: React.FC = () => {
 
     try {
       // Only allow login
-      await signInWithEmailAndPassword(auth, email, password);
+      await auth.signInWithEmailAndPassword(email, password);
       navigate('/admin/dashboard');
     } catch (err: any) {
       console.error(err);
