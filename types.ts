@@ -57,12 +57,14 @@ export interface ParentFormData {
   fatherRelationScore: number; // 1-10
   temperament: string;
   exceptionalSituations: string;
+  note: string; // Added field
 }
 
 export interface TeacherFormData {
   gradeClass: string;
   studentName: string;
   referralReason: string;
+  desiredChange: string; // Added field
 
   // School Life Scale (1-5)
   peerRelation: string;
@@ -74,6 +76,7 @@ export interface TeacherFormData {
   inattention: string;
   impulsivity: string;
   aggression: string;
+  behavioralExamples?: string; // Added field for specific examples
 
   // Emotions
   emotions: string[];

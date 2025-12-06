@@ -1,14 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
-  LogOut, Smile, Home, BookOpen, Search, Filter, 
-  Loader2, MoreHorizontal, Calendar, ArrowRight 
+  LogOut, Smile, Home, BookOpen, Search, 
+  Loader2, Calendar, ArrowRight, Settings 
 } from 'lucide-react';
 import { db, auth } from '../firebase';
 import { AdminDetailModal } from './AdminDetailModal';
+import { PasswordSettingsModal } from './PasswordSettingsModal';
 
 type TabType = 'student' | 'parent' | 'teacher';
 
@@ -18,6 +18,7 @@ export const AdminDashboard: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   // Data fetching logic
   useEffect(() => {
@@ -29,8 +30,6 @@ export const AdminDashboard: React.FC = () => {
     setData([]);
     try {
       const collectionName = `counseling_${activeTab}`;
-      // Basic query - note: complex sorting might require Firestore index
-      // For now, fetching all and sorting client-side is safer for prototyping
       const q = query(collection(db, collectionName)); 
       const querySnapshot = await getDocs(q);
       
@@ -91,14 +90,6 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const getTabColor = (tab: TabType) => {
-    switch(tab) {
-      case 'student': return 'text-blue-600 bg-blue-100';
-      case 'parent': return 'text-amber-600 bg-amber-100';
-      case 'teacher': return 'text-purple-600 bg-purple-100';
-    }
-  };
-
   return (
     <div className="min-h-screen bg-slate-50">
       
@@ -137,31 +128,41 @@ export const AdminDashboard: React.FC = () => {
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* Tab Navigation */}
-        <div className="flex space-x-2 md:space-x-4 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+        {/* Tab Navigation & Settings */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+          <div className="flex space-x-2 md:space-x-4 overflow-x-auto pb-2 scrollbar-hide">
+            <button
+              onClick={() => setActiveTab('student')}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-all whitespace-nowrap ${
+                activeTab === 'student' ? 'bg-blue-500 text-white shadow-lg shadow-blue-200' : 'bg-white text-slate-500 hover:bg-slate-100'
+              }`}
+            >
+              <Smile size={20} /> 학생 상담
+            </button>
+            <button
+              onClick={() => setActiveTab('parent')}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-all whitespace-nowrap ${
+                activeTab === 'parent' ? 'bg-amber-500 text-white shadow-lg shadow-orange-200' : 'bg-white text-slate-500 hover:bg-slate-100'
+              }`}
+            >
+              <Home size={20} /> 학부모 상담
+            </button>
+            <button
+              onClick={() => setActiveTab('teacher')}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-all whitespace-nowrap ${
+                activeTab === 'teacher' ? 'bg-purple-600 text-white shadow-lg shadow-purple-200' : 'bg-white text-slate-500 hover:bg-slate-100'
+              }`}
+            >
+              <BookOpen size={20} /> 교사 의뢰
+            </button>
+          </div>
+
           <button
-            onClick={() => setActiveTab('student')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-all whitespace-nowrap ${
-              activeTab === 'student' ? 'bg-blue-500 text-white shadow-lg shadow-blue-200' : 'bg-white text-slate-500 hover:bg-slate-100'
-            }`}
+            onClick={() => setShowPasswordModal(true)}
+            className="flex items-center gap-2 px-4 py-3 rounded-full font-bold bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors border border-slate-200 shadow-sm"
           >
-            <Smile size={20} /> 학생 상담
-          </button>
-          <button
-            onClick={() => setActiveTab('parent')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-all whitespace-nowrap ${
-              activeTab === 'parent' ? 'bg-amber-500 text-white shadow-lg shadow-orange-200' : 'bg-white text-slate-500 hover:bg-slate-100'
-            }`}
-          >
-            <Home size={20} /> 학부모 상담
-          </button>
-          <button
-            onClick={() => setActiveTab('teacher')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-all whitespace-nowrap ${
-              activeTab === 'teacher' ? 'bg-purple-600 text-white shadow-lg shadow-purple-200' : 'bg-white text-slate-500 hover:bg-slate-100'
-            }`}
-          >
-            <BookOpen size={20} /> 교사 의뢰
+            <Settings size={18} />
+            <span className="text-sm">교사 의뢰 비밀번호 설정</span>
           </button>
         </div>
 
@@ -244,6 +245,11 @@ export const AdminDashboard: React.FC = () => {
         type={activeTab}
         onUpdateStatus={handleUpdateStatus}
         onDelete={handleDelete}
+      />
+
+      <PasswordSettingsModal 
+        isOpen={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
       />
     </div>
   );

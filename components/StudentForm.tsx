@@ -9,6 +9,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { StudentFormData } from '../types';
 import { SuccessModal } from './SuccessModal';
+import { ErrorModal } from './ErrorModal';
 
 // Shim for Controller since it's missing in the environment
 const Controller = ({ control, name, render, rules }: any) => {
@@ -68,6 +69,8 @@ export const StudentForm: React.FC = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
   
   const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<StudentFormData>({
     defaultValues: {
@@ -129,13 +132,14 @@ export const StudentForm: React.FC = () => {
   };
 
   const onError = (errors: any) => {
-    const missingFields = [];
-    if (errors.name) missingFields.push("이름");
-    if (errors.gradeClass) missingFields.push("학년/반");
-    if (errors.reason) missingFields.push("상담 신청 이유");
+    const missing = [];
+    if (errors.name) missing.push("이름");
+    if (errors.gradeClass) missing.push("학년/반");
+    if (errors.reason) missing.push("상담 신청 이유");
     
-    if (missingFields.length > 0) {
-      alert(`다음 필수 항목이 입력되지 않았습니다:\n\n• ${missingFields.join('\n• ')}`);
+    if (missing.length > 0) {
+      setMissingFields(missing);
+      setShowErrorModal(true);
     }
   };
 
@@ -163,6 +167,12 @@ export const StudentForm: React.FC = () => {
         onClose={handleSuccessClose}
         message="상담 신청 완료!"
         subMessage="선생님이 확인 후 연락줄게요. 조금만 기다려주세요."
+      />
+
+      <ErrorModal 
+        isOpen={showErrorModal}
+        onClose={() => setShowErrorModal(false)}
+        missingFields={missingFields}
       />
 
       <div className="w-full max-w-2xl z-10">

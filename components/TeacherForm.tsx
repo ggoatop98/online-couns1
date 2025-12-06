@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, useController, useWatch, Control } from 'react-hook-form';
 import { 
   Send, ChevronLeft, GraduationCap, FileText, CheckSquare, 
   Activity, Brain, LayoutGrid, AlertCircle, Sparkles 
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { TeacherFormData } from '../types';
 import { PasswordModal } from './PasswordModal';
 import { SuccessModal } from './SuccessModal';
+import { ErrorModal } from './ErrorModal';
 
 // Shim for Controller since it's missing in the environment
 const Controller = ({ control, name, render, rules }: any) => {
@@ -40,14 +41,15 @@ const Section: React.FC<SectionProps> = ({ title, icon: Icon, children }) => (
 );
 
 const RadioGroup5 = ({ label, value, onChange }: { label: string, value: string, onChange: (val: string) => void }) => {
-  const options = ['매우 나쁨', '나쁨', '보통', '좋음', '매우 좋음', '해당 없음'];
+  // Removed '해당 없음'
+  const options = ['매우 나쁨', '나쁨', '보통', '좋음', '매우 좋음'];
   return (
     <div className="bg-purple-50/50 p-5 rounded-2xl border border-purple-50">
       <p className="font-bold text-slate-700 mb-4">{label}</p>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {options.map((opt) => (
           <label key={opt} className={`
-            cursor-pointer px-3 py-2 rounded-xl text-sm font-medium transition-all text-center border
+            cursor-pointer px-1 py-3 md:px-2 rounded-xl text-sm font-medium transition-all text-center border flex items-center justify-center
             ${value === opt 
               ? 'bg-purple-500 text-white border-purple-500 shadow-md' 
               : 'bg-white text-slate-600 border-purple-100 hover:bg-purple-50'}
@@ -102,8 +104,31 @@ export const TeacherForm: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(true);
   const [authError, setAuthError] = useState('');
+  const [correctPassword, setCorrectPassword] = useState('2580'); // Default fallback
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
+
+  // Fetch password from Firebase on mount
+  useEffect(() => {
+    const fetchPassword = async () => {
+      try {
+        const docRef = doc(db, 'config', 'teacher_auth');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists() && docSnap.data().password) {
+          setCorrectPassword(docSnap.data().password);
+        }
+      } catch (error: any) {
+        // Silently handle permission errors by keeping default password
+        if (error.code !== 'permission-denied') {
+           console.error("Error fetching teacher config:", error);
+        }
+      }
+    };
+    fetchPassword();
+  }, []);
 
   const { register, handleSubmit, control, watch, formState: { errors } } = useForm<TeacherFormData>({
     defaultValues: {
@@ -116,7 +141,7 @@ export const TeacherForm: React.FC = () => {
   const repetitiveBehavior = watch('repetitiveBehavior');
 
   const handleAuthSubmit = (password: string) => {
-    if (password === '2580') {
+    if (password === correctPassword) {
       setIsAuthenticated(true);
       setShowAuthModal(false);
     } else {
@@ -147,13 +172,15 @@ export const TeacherForm: React.FC = () => {
   };
 
   const onError = (errors: any) => {
-    const missingFields = [];
-    if (errors.studentName) missingFields.push("학생 이름");
-    if (errors.gradeClass) missingFields.push("학년/반");
-    if (errors.referralReason) missingFields.push("의뢰 사유");
+    const missing = [];
+    if (errors.studentName) missing.push("학생 이름");
+    if (errors.gradeClass) missing.push("학년/반");
+    if (errors.referralReason) missing.push("의뢰 사유");
+    if (errors.desiredChange) missing.push("기대하는 변화");
     
-    if (missingFields.length > 0) {
-      alert(`다음 필수 항목이 입력되지 않았습니다:\n\n• ${missingFields.join('\n• ')}`);
+    if (missing.length > 0) {
+      setMissingFields(missing);
+      setShowErrorModal(true);
     }
   };
 
@@ -186,6 +213,12 @@ export const TeacherForm: React.FC = () => {
         onClose={handleSuccessClose}
         message="상담 의뢰가 접수되었습니다."
         subMessage="선생님의 고민을 함께 나누겠습니다."
+      />
+
+      <ErrorModal
+        isOpen={showErrorModal}
+        onClose={() => setShowErrorModal(false)}
+        missingFields={missingFields}
       />
 
       <div className="w-full max-w-3xl z-10">
@@ -239,6 +272,17 @@ export const TeacherForm: React.FC = () => {
               />
               {errors.referralReason && <p className="text-red-400 text-sm mt-1">{errors.referralReason.message}</p>}
             </div>
+            {/* Added Desired Change Input */}
+            <div>
+              <label className="block text-slate-700 font-bold mb-2">상담을 통해 기대하는 변화 <span className="text-red-400">*</span></label>
+              <textarea 
+                {...register('desiredChange', { required: '기대하는 변화를 입력해주세요.' })}
+                className="w-full px-4 py-4 rounded-xl bg-slate-50 border border-purple-100 focus:bg-white focus:ring-2 focus:ring-purple-200 focus:border-purple-300 outline-none transition-all resize-none"
+                rows={4}
+                placeholder="상담 후 학생에게 기대하는 긍정적인 변화나 목표를 적어주세요."
+              />
+              {errors.desiredChange && <p className="text-red-400 text-sm mt-1">{errors.desiredChange.message}</p>}
+            </div>
           </Section>
 
           {/* Section B: School Life Scale */}
@@ -285,6 +329,17 @@ export const TeacherForm: React.FC = () => {
                   )}
                 />
               ))}
+            </div>
+
+            {/* New Input for Actual Examples */}
+            <div className="mt-6 pt-6 border-t border-purple-100">
+               <label className="block text-slate-700 font-bold mb-2">학생의 모습에 대한 실제 사례</label>
+               <textarea 
+                {...register('behavioralExamples')}
+                className="w-full px-4 py-4 rounded-xl bg-slate-50 border border-purple-100 focus:bg-white focus:ring-2 focus:ring-purple-200 focus:border-purple-300 outline-none transition-all resize-none"
+                rows={4}
+                placeholder="구체적인 일화나 관찰된 행동 사례를 적어주세요."
+               />
             </div>
           </Section>
 

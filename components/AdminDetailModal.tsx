@@ -43,12 +43,14 @@ const ORDERED_FIELDS = {
     'motherRelationScore', 
     'fatherRelationScore', 
     'temperament', 
-    'exceptionalSituations'
+    'exceptionalSituations',
+    'note' // Added field
   ],
   teacher: [
     'studentName', 
     'gradeClass', 
     'referralReason',
+    'desiredChange', // Added field
     'peerRelation', 
     'classAttitude', 
     'learningAbility', 
@@ -56,6 +58,7 @@ const ORDERED_FIELDS = {
     'inattention', 
     'impulsivity', 
     'aggression',
+    'behavioralExamples', 
     'emotions', 
     'otherEmotionDetail',
     'repetitiveBehavior', 
@@ -99,6 +102,7 @@ const FIELD_LABELS: Record<string, string> = {
   fatherRelationScore: "아빠와의 관계 점수",
   temperament: "아동의 기질적 특성",
   exceptionalSituations: "예외적 상황 (긍정적 자원)",
+  note: "참고",
 
   // Teacher Form
   referralReason: "의뢰 사유",
@@ -108,6 +112,7 @@ const FIELD_LABELS: Record<string, string> = {
   inattention: "부주의함",
   impulsivity: "충동성",
   aggression: "공격성",
+  behavioralExamples: "학생의 모습에 대한 실제 사례", 
   emotions: "정서 상태 (주된 정서)",
   otherEmotionDetail: "기타 정서 내용",
   repetitiveBehavior: "교실에서 눈에 띄는 반복 행동이 있나요?",
@@ -119,9 +124,12 @@ const FIELD_LABELS: Record<string, string> = {
 // 3. Helper to get label
 const getLabel = (key: string, type: 'student' | 'parent' | 'teacher'): string => {
   if (key === 'desiredChange') {
-    return type === 'parent' 
-      ? "상담을 통해 기대하는 변화" 
-      : "변화되고 싶은 점";
+    // Both Parent and Teacher forms use this label
+    if (type === 'parent' || type === 'teacher') {
+       return "상담을 통해 기대하는 변화";
+    }
+    // Student form uses this label
+    return "변화되고 싶은 점";
   }
   return FIELD_LABELS[key] || key;
 };

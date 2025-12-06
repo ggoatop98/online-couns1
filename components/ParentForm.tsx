@@ -9,6 +9,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { ParentFormData } from '../types';
 import { SuccessModal } from './SuccessModal';
+import { ErrorModal } from './ErrorModal';
 
 // Shim for Controller since it's missing in the environment
 const Controller = ({ control, name, render, rules }: any) => {
@@ -106,6 +107,8 @@ export const ParentForm: React.FC = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
   
   const { register, handleSubmit, control, formState: { errors } } = useForm<ParentFormData>({
     defaultValues: {
@@ -139,14 +142,15 @@ export const ParentForm: React.FC = () => {
   };
 
   const onError = (errors: any) => {
-    const missingFields = [];
-    if (errors.childName) missingFields.push("자녀 이름");
-    if (errors.gradeClass) missingFields.push("학년/반");
-    if (errors.worries) missingFields.push("걱정되는 점");
-    if (errors.desiredChange) missingFields.push("기대하는 변화");
+    const missing = [];
+    if (errors.childName) missing.push("자녀 이름");
+    if (errors.gradeClass) missing.push("학년/반");
+    if (errors.worries) missing.push("걱정되는 점");
+    if (errors.desiredChange) missing.push("기대하는 변화");
     
-    if (missingFields.length > 0) {
-      alert(`다음 필수 항목이 입력되지 않았습니다:\n\n• ${missingFields.join('\n• ')}`);
+    if (missing.length > 0) {
+      setMissingFields(missing);
+      setShowErrorModal(true);
     }
   };
 
@@ -166,6 +170,12 @@ export const ParentForm: React.FC = () => {
         onClose={handleSuccessClose}
         message="신청 완료"
         subMessage="확인 후 연락드리겠습니다."
+      />
+
+      <ErrorModal
+        isOpen={showErrorModal}
+        onClose={() => setShowErrorModal(false)}
+        missingFields={missingFields}
       />
 
       <div className="w-full max-w-3xl z-10">
@@ -355,6 +365,14 @@ export const ParentForm: React.FC = () => {
                   placeholder="아이가 비교적 안정된 모습을 보이는 상황이나 장소가 있다면 적어주세요." 
                   rows={2}
                   {...register('exceptionalSituations')}
+                />
+              </div>
+              <div>
+                <Label>참고</Label>
+                <TextArea 
+                  placeholder="상담 선생님에게 따로 하고 싶은 말이나 요청할 사항이 있으면 자유롭게 적어주세요." 
+                  rows={3}
+                  {...register('note')}
                 />
               </div>
             </div>
