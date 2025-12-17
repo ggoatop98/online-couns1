@@ -38,19 +38,24 @@ const ORDERED_FIELDS = {
     'examples', 
     'onsetAndCause', 
     'attemptsAndEffects', 
-    'desiredChange', 
+    'desiredChange',
+    'strengths',
+    'favoriteActivities',
     'medicalHistory', 
+    'medicalHistoryDetail', // Added
     'motherRelationScore', 
     'fatherRelationScore', 
     'temperament', 
     'exceptionalSituations',
-    'note' // Added field
+    'note'
   ],
   teacher: [
     'studentName', 
     'gradeClass', 
     'referralReason',
-    'desiredChange', // Added field
+    'desiredChange',
+    'strengths',
+    'favoriteActivities',
     'peerRelation', 
     'classAttitude', 
     'learningAbility', 
@@ -98,6 +103,7 @@ const FIELD_LABELS: Record<string, string> = {
   onsetAndCause: "문제의 시작 시점과 원인",
   attemptsAndEffects: "지금까지 시도해 본 해결 방법과 그 효과",
   medicalHistory: "병원 진료 또는 상담 경험 유무",
+  medicalHistoryDetail: "병원/상담센터 의견", // Added
   motherRelationScore: "엄마와의 관계 점수",
   fatherRelationScore: "아빠와의 관계 점수",
   temperament: "아동의 기질적 특성",
@@ -119,6 +125,10 @@ const FIELD_LABELS: Record<string, string> = {
   repetitiveBehaviorDetail: "반복 행동 내용",
   frequency: "문제 상황의 빈도",
   severity: "문제 상황의 심각성",
+
+  // Added Fields
+  strengths: "학생의 강점",
+  favoriteActivities: "학생이 좋아하는 활동"
 };
 
 // 3. Helper to get label

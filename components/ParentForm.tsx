@@ -110,7 +110,7 @@ export const ParentForm: React.FC = () => {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
   
-  const { register, handleSubmit, control, formState: { errors } } = useForm<ParentFormData>({
+  const { register, handleSubmit, control, watch, formState: { errors } } = useForm<ParentFormData>({
     defaultValues: {
       relation: '엄마',
       medicalHistory: '아니오',
@@ -118,6 +118,8 @@ export const ParentForm: React.FC = () => {
       fatherRelationScore: 5
     }
   });
+
+  const medicalHistory = watch('medicalHistory');
 
   const onSubmit = async (data: ParentFormData) => {
     setIsSubmitting(true);
@@ -309,6 +311,27 @@ export const ParentForm: React.FC = () => {
 
           {/* Section D: Additional Info */}
           <SectionCard title="추가 정보 및 척도 체크" icon={Activity} delay="0.4s">
+            
+            {/* Added: Strengths & Activities */}
+            <div className="space-y-6 mb-8 border-b border-orange-100 pb-8">
+              <div>
+                <Label>학생의 강점</Label>
+                <p className="text-sm text-slate-400 mb-2 font-medium">아이가 잘하거나 칭찬해주고 싶은 점을 적어주세요.</p>
+                <TextArea 
+                  placeholder="예: 만들기를 잘함, 친구를 잘 도와줌, 인사를 잘함 등" 
+                  rows={2}
+                  {...register('strengths')}
+                />
+              </div>
+              <div>
+                <Label>학생이 좋아하는 활동</Label>
+                <Input 
+                  placeholder="예: 레고 조립, 축구, 그림 그리기 등" 
+                  {...register('favoriteActivities')}
+                />
+              </div>
+            </div>
+
             <div className="mb-6">
               <Label>병원 진료 또는 상담 경험 유무</Label>
               <div className="flex gap-6 mt-3">
@@ -324,6 +347,18 @@ export const ParentForm: React.FC = () => {
                   </label>
                 ))}
               </div>
+              
+              {/* Conditional input for medical history detail */}
+              {medicalHistory === '예' && (
+                <div className="mt-4 animate-fade-in-up">
+                  <Label>병원 또는 상담센터의 의견 (상세 내용)</Label>
+                  <TextArea 
+                    placeholder="진단 내용이나 전문가의 소견 등을 적어주세요." 
+                    rows={3}
+                    {...register('medicalHistoryDetail')}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

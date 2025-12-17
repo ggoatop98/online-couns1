@@ -272,6 +272,7 @@ export const TeacherForm: React.FC = () => {
               />
               {errors.referralReason && <p className="text-red-400 text-sm mt-1">{errors.referralReason.message}</p>}
             </div>
+            
             {/* Added Desired Change Input */}
             <div>
               <label className="block text-slate-700 font-bold mb-2">상담을 통해 기대하는 변화 <span className="text-red-400">*</span></label>
@@ -282,6 +283,29 @@ export const TeacherForm: React.FC = () => {
                 placeholder="상담 후 학생에게 기대하는 긍정적인 변화나 목표를 적어주세요."
               />
               {errors.desiredChange && <p className="text-red-400 text-sm mt-1">{errors.desiredChange.message}</p>}
+            </div>
+
+            {/* Added: Strengths & Activities */}
+            <div className="pt-6 border-t border-purple-100">
+              <div className="grid grid-cols-1 gap-6">
+                <div>
+                  <label className="block text-slate-700 font-bold mb-2">학생의 강점</label>
+                  <textarea 
+                    {...register('strengths')}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-purple-100 focus:bg-white focus:ring-2 focus:ring-purple-200 focus:border-purple-300 outline-none transition-all resize-none"
+                    rows={2}
+                    placeholder="학급에서 관찰되는 학생의 긍정적인 자원이나 강점을 적어주세요."
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-700 font-bold mb-2">학생이 좋아하는 활동</label>
+                  <input 
+                    {...register('favoriteActivities')}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-purple-100 focus:bg-white focus:ring-2 focus:ring-purple-200 focus:border-purple-300 outline-none transition-all"
+                    placeholder="예: 체육 활동, 만들기, 독서 등"
+                  />
+                </div>
+              </div>
             </div>
           </Section>
 

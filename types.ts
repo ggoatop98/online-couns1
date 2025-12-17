@@ -51,8 +51,13 @@ export interface ParentFormData {
   attemptsAndEffects: string;
   desiredChange: string;
 
+  // Added Fields
+  strengths: string;
+  favoriteActivities: string;
+
   // Check
   medicalHistory: string; // 'yes' | 'no'
+  medicalHistoryDetail?: string; // Added for detailed info when history is 'yes'
   motherRelationScore: number; // 1-10
   fatherRelationScore: number; // 1-10
   temperament: string;
@@ -65,6 +70,10 @@ export interface TeacherFormData {
   studentName: string;
   referralReason: string;
   desiredChange: string; // Added field
+  
+  // Added Fields
+  strengths: string;
+  favoriteActivities: string;
 
   // School Life Scale (1-5)
   peerRelation: string;
