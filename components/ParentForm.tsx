@@ -10,6 +10,7 @@ import { db } from '../firebase';
 import { ParentFormData } from '../types';
 import { SuccessModal } from './SuccessModal';
 import { ErrorModal } from './ErrorModal';
+import { sendNotification } from '../services/notificationService';
 
 // Shim for Controller since it's missing in the environment
 const Controller = ({ control, name, render, rules }: any) => {
@@ -133,6 +134,10 @@ export const ParentForm: React.FC = () => {
       });
 
       console.log("=== 학부모 상담 신청 데이터 저장 완료 ===");
+      
+      // 알림 전송
+      sendNotification('parent', data);
+
       setShowSuccessModal(true);
       
     } catch (error) {

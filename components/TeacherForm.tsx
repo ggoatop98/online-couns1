@@ -11,6 +11,7 @@ import { TeacherFormData } from '../types';
 import { PasswordModal } from './PasswordModal';
 import { SuccessModal } from './SuccessModal';
 import { ErrorModal } from './ErrorModal';
+import { sendNotification } from '../services/notificationService';
 
 // Shim for Controller since it's missing in the environment
 const Controller = ({ control, name, render, rules }: any) => {
@@ -162,6 +163,10 @@ export const TeacherForm: React.FC = () => {
         status: '접수대기'
       });
       console.log("=== 교사 의뢰 데이터 저장 완료 ===");
+      
+      // 알림 전송
+      sendNotification('teacher', data);
+
       setShowSuccessModal(true);
     } catch (error) {
       console.error("Error adding document: ", error);

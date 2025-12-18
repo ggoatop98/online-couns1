@@ -3,11 +3,12 @@ import { collection, query, getDocs, doc, updateDoc, deleteDoc } from 'firebase/
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   LogOut, Smile, Home, BookOpen, Search, 
-  Loader2, Calendar, ArrowRight, Settings, Trash2 
+  Loader2, Calendar, ArrowRight, Settings, Trash2, Bell 
 } from 'lucide-react';
 import { db, auth } from '../firebase';
 import { AdminDetailModal } from './AdminDetailModal';
 import { PasswordSettingsModal } from './PasswordSettingsModal';
+import { NotificationSettingsModal } from './NotificationSettingsModal';
 
 type TabType = 'student' | 'parent' | 'teacher';
 
@@ -18,6 +19,7 @@ export const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
   
   // Bulk Selection State
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -216,13 +218,23 @@ export const AdminDashboard: React.FC = () => {
             </button>
           </div>
 
-          <button
-            onClick={() => setShowPasswordModal(true)}
-            className="flex items-center gap-2 px-4 py-3 rounded-full font-bold bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors border border-slate-200 shadow-sm"
-          >
-            <Settings size={18} />
-            <span className="text-sm">교사 의뢰 비밀번호 설정</span>
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowNotificationModal(true)}
+              className="flex items-center gap-2 px-4 py-3 rounded-full font-bold bg-white text-indigo-500 hover:bg-indigo-50 hover:text-indigo-700 transition-colors border border-indigo-100 shadow-sm"
+            >
+              <Bell size={18} />
+              <span className="text-sm">알림 설정</span>
+            </button>
+
+            <button
+              onClick={() => setShowPasswordModal(true)}
+              className="flex items-center gap-2 px-4 py-3 rounded-full font-bold bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors border border-slate-200 shadow-sm"
+            >
+              <Settings size={18} />
+              <span className="text-sm">비밀번호 설정</span>
+            </button>
+          </div>
         </div>
 
         {/* List View */}
@@ -373,6 +385,11 @@ export const AdminDashboard: React.FC = () => {
       <PasswordSettingsModal 
         isOpen={showPasswordModal}
         onClose={() => setShowPasswordModal(false)}
+      />
+
+      <NotificationSettingsModal
+        isOpen={showNotificationModal}
+        onClose={() => setShowNotificationModal(false)}
       />
     </div>
   );

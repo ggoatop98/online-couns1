@@ -22,6 +22,11 @@ export interface PasswordModalProps {
   errorMessage?: string; // Added for external validation feedback
 }
 
+export interface NotificationConfig {
+  webhookUrl: string;
+  isEnabled: boolean;
+}
+
 export interface StudentFormData {
   name: string;
   gradeClass: string;

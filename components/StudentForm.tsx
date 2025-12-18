@@ -10,6 +10,7 @@ import { db } from '../firebase';
 import { StudentFormData } from '../types';
 import { SuccessModal } from './SuccessModal';
 import { ErrorModal } from './ErrorModal';
+import { sendNotification } from '../services/notificationService';
 
 // Shim for Controller since it's missing in the environment
 const Controller = ({ control, name, render, rules }: any) => {
@@ -120,6 +121,10 @@ export const StudentForm: React.FC = () => {
       });
       
       console.log("=== 상담 신청 데이터 저장 완료 ===");
+      
+      // 알림 전송 (비동기로 실행, UI 블로킹 방지)
+      sendNotification('student', data);
+
       // Show success modal instead of alert
       setShowSuccessModal(true);
       
