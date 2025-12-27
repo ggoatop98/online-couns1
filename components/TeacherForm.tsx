@@ -133,9 +133,33 @@ export const TeacherForm: React.FC = () => {
   }, []);
 
   const { register, handleSubmit, control, watch, formState: { errors } } = useForm<TeacherFormData>({
+    // [중요] 모든 필드에 대해 기본값을 설정해야 '두 번 클릭해야 제출되는 문제'가 해결됩니다.
+    // 선택 항목들도 빈 문자열('')로 초기화합니다.
     defaultValues: {
+      studentName: '',
+      gradeClass: '',
+      referralReason: '',
+      desiredChange: '',
+      
+      strengths: '',
+      favoriteActivities: '',
+      
+      peerRelation: '',
+      classAttitude: '',
+      learningAbility: '',
+      compliance: '',
+      
+      inattention: '',
+      impulsivity: '',
+      aggression: '',
+      behavioralExamples: '',
+      
       emotions: [],
-      repetitiveBehavior: 'no'
+      otherEmotionDetail: '',
+      repetitiveBehavior: 'no',
+      repetitiveBehaviorDetail: '',
+      frequency: '',
+      severity: ''
     }
   });
 
@@ -158,8 +182,6 @@ export const TeacherForm: React.FC = () => {
   const onSubmit = async (data: TeacherFormData) => {
     setIsSubmitting(true);
     try {
-      // [중요] 선택 항목이 입력되지 않았을 때 undefined로 넘어가면 Firestore 오류가 발생합니다.
-      // 따라서 모든 필드에 대해 기본값(빈 문자열 등)을 설정하여 안전하게 저장합니다.
       const sanitizedData = {
         // 필수 항목 (Form Validation으로 체크됨)
         studentName: data.studentName,
@@ -200,7 +222,6 @@ export const TeacherForm: React.FC = () => {
       console.log("=== 교사 의뢰 데이터 저장 완료 ===");
       
       // 알림 전송 (데이터 저장 성공 후 실행됨)
-      // sanitizedData를 넘겨주어야 undefined 오류 없이 전송됩니다.
       sendNotification('teacher', sanitizedData);
 
       setShowSuccessModal(true);
