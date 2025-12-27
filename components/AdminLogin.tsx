@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowRight, AlertTriangle, ShieldCheck, Home } from 'lucide-react';
@@ -15,6 +16,15 @@ export const AdminLogin: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+
+    // 체험 모드 로그인 처리
+    if (!auth) {
+      setTimeout(() => {
+        sessionStorage.setItem('demo_auth', 'true');
+        navigate('/admin/dashboard');
+      }, 800);
+      return;
+    }
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -48,7 +58,14 @@ export const AdminLogin: React.FC = () => {
             <ShieldCheck size={40} className="text-blue-500" />
           </div>
           <h1 className="text-2xl font-bold text-slate-800">관리자 로그인</h1>
-          <p className="text-slate-500 mt-2">상담 관리 시스템 접속을 위해<br/>로그인해 주세요.</p>
+          
+          {!auth ? (
+            <p className="text-blue-500 mt-2 font-bold bg-blue-50 py-2 px-4 rounded-lg inline-block text-sm">
+              ✨ 현재 체험 모드입니다<br/>아무 정보나 입력하면 로그인됩니다.
+            </p>
+          ) : (
+            <p className="text-slate-500 mt-2">상담 관리 시스템 접속을 위해<br/>로그인해 주세요.</p>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">

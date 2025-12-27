@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm, useController, useWatch, Control } from 'react-hook-form';
 import { 
@@ -157,15 +158,50 @@ export const TeacherForm: React.FC = () => {
   const onSubmit = async (data: TeacherFormData) => {
     setIsSubmitting(true);
     try {
-      await addDoc(collection(db, 'counseling_teacher'), {
-        ...data,
+      // [중요] 선택 항목이 입력되지 않았을 때 undefined로 넘어가면 Firestore 오류가 발생합니다.
+      // 따라서 모든 필드에 대해 기본값(빈 문자열 등)을 설정하여 안전하게 저장합니다.
+      const sanitizedData = {
+        // 필수 항목 (Form Validation으로 체크됨)
+        studentName: data.studentName,
+        gradeClass: data.gradeClass,
+        referralReason: data.referralReason,
+        desiredChange: data.desiredChange,
+        
+        // 선택 항목 (값이 없으면 빈 문자열로 처리)
+        strengths: data.strengths || '',
+        favoriteActivities: data.favoriteActivities || '',
+        
+        // 척도 항목 (선택 안함 허용)
+        peerRelation: data.peerRelation || '',
+        classAttitude: data.classAttitude || '',
+        learningAbility: data.learningAbility || '',
+        compliance: data.compliance || '',
+        
+        // 행동 특성 (선택 안함 허용)
+        inattention: data.inattention || '',
+        impulsivity: data.impulsivity || '',
+        aggression: data.aggression || '',
+        behavioralExamples: data.behavioralExamples || '',
+        
+        // 정서 및 기타
+        emotions: data.emotions || [],
+        otherEmotionDetail: data.otherEmotionDetail || '',
+        repetitiveBehavior: data.repetitiveBehavior || 'no',
+        repetitiveBehaviorDetail: data.repetitiveBehaviorDetail || '',
+        frequency: data.frequency || '',
+        severity: data.severity || '',
+        
+        // 시스템 필드
         createdAt: serverTimestamp(),
         status: '접수대기'
-      });
+      };
+
+      await addDoc(collection(db, 'counseling_teacher'), sanitizedData);
       console.log("=== 교사 의뢰 데이터 저장 완료 ===");
       
-      // 알림 전송
-      sendNotification('teacher', data);
+      // 알림 전송 (데이터 저장 성공 후 실행됨)
+      // sanitizedData를 넘겨주어야 undefined 오류 없이 전송됩니다.
+      sendNotification('teacher', sanitizedData);
 
       setShowSuccessModal(true);
     } catch (error) {
@@ -252,30 +288,30 @@ export const TeacherForm: React.FC = () => {
                 <label className="block text-slate-700 font-bold mb-2">학생 이름 <span className="text-red-400">*</span></label>
                 <input 
                   {...register('studentName', { required: '학생 이름을 입력해주세요.' })}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-purple-100 focus:bg-white focus:ring-2 focus:ring-purple-200 focus:border-purple-300 outline-none transition-all"
+                  className={`w-full px-4 py-3 rounded-xl bg-slate-50 border transition-all outline-none focus:bg-white focus:ring-2 focus:ring-purple-200 ${errors.studentName ? 'border-red-300' : 'border-purple-100 focus:border-purple-300'}`}
                   placeholder="예: 이학생"
                 />
-                 {errors.studentName && <p className="text-red-400 text-sm mt-1">{errors.studentName.message}</p>}
+                 {errors.studentName && <p className="text-red-400 text-sm mt-1 flex items-center"><AlertCircle size={14} className="mr-1"/>{errors.studentName.message}</p>}
               </div>
               <div>
                 <label className="block text-slate-700 font-bold mb-2">학년 / 반 <span className="text-red-400">*</span></label>
                 <input 
                   {...register('gradeClass', { required: '학년/반을 입력해주세요.' })}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-purple-100 focus:bg-white focus:ring-2 focus:ring-purple-200 focus:border-purple-300 outline-none transition-all"
+                  className={`w-full px-4 py-3 rounded-xl bg-slate-50 border transition-all outline-none focus:bg-white focus:ring-2 focus:ring-purple-200 ${errors.gradeClass ? 'border-red-300' : 'border-purple-100 focus:border-purple-300'}`}
                   placeholder="예: 4학년 1반"
                 />
-                 {errors.gradeClass && <p className="text-red-400 text-sm mt-1">{errors.gradeClass.message}</p>}
+                 {errors.gradeClass && <p className="text-red-400 text-sm mt-1 flex items-center"><AlertCircle size={14} className="mr-1"/>{errors.gradeClass.message}</p>}
               </div>
             </div>
             <div>
               <label className="block text-slate-700 font-bold mb-2">의뢰 사유 <span className="text-red-400">*</span></label>
               <textarea 
                 {...register('referralReason', { required: '의뢰 사유를 입력해주세요.' })}
-                className="w-full px-4 py-4 rounded-xl bg-slate-50 border border-purple-100 focus:bg-white focus:ring-2 focus:ring-purple-200 focus:border-purple-300 outline-none transition-all resize-none"
+                className={`w-full px-4 py-4 rounded-xl bg-slate-50 border transition-all resize-none outline-none focus:bg-white focus:ring-2 focus:ring-purple-200 ${errors.referralReason ? 'border-red-300' : 'border-purple-100 focus:border-purple-300'}`}
                 rows={8}
                 placeholder="상담을 의뢰하게 된 구체적인 이유와 관찰 내용을 적어주세요."
               />
-              {errors.referralReason && <p className="text-red-400 text-sm mt-1">{errors.referralReason.message}</p>}
+              {errors.referralReason && <p className="text-red-400 text-sm mt-1 flex items-center"><AlertCircle size={14} className="mr-1"/>{errors.referralReason.message}</p>}
             </div>
             
             {/* Added Desired Change Input */}
@@ -283,11 +319,11 @@ export const TeacherForm: React.FC = () => {
               <label className="block text-slate-700 font-bold mb-2">상담을 통해 기대하는 변화 <span className="text-red-400">*</span></label>
               <textarea 
                 {...register('desiredChange', { required: '기대하는 변화를 입력해주세요.' })}
-                className="w-full px-4 py-4 rounded-xl bg-slate-50 border border-purple-100 focus:bg-white focus:ring-2 focus:ring-purple-200 focus:border-purple-300 outline-none transition-all resize-none"
+                className={`w-full px-4 py-4 rounded-xl bg-slate-50 border transition-all resize-none outline-none focus:bg-white focus:ring-2 focus:ring-purple-200 ${errors.desiredChange ? 'border-red-300' : 'border-purple-100 focus:border-purple-300'}`}
                 rows={4}
                 placeholder="상담 후 학생에게 기대하는 긍정적인 변화나 목표를 적어주세요."
               />
-              {errors.desiredChange && <p className="text-red-400 text-sm mt-1">{errors.desiredChange.message}</p>}
+              {errors.desiredChange && <p className="text-red-400 text-sm mt-1 flex items-center"><AlertCircle size={14} className="mr-1"/>{errors.desiredChange.message}</p>}
             </div>
 
             {/* Added: Strengths & Activities */}

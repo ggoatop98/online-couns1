@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs, doc, updateDoc, deleteDoc, orderBy, limit } from 'firebase/firestore';
 import { useNavigate, Link } from 'react-router-dom';
@@ -12,6 +13,68 @@ import { NotificationSettingsModal } from './NotificationSettingsModal';
 import { signOut } from 'firebase/auth';
 
 type TabType = 'student' | 'parent' | 'teacher';
+
+// 체험 모드용 샘플 데이터 생성 헬퍼
+const getMockData = (type: TabType) => {
+  const now = new Date();
+  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  
+  // Firestore Timestamp 흉내
+  const mockTimestamp = (date: Date) => ({
+    toDate: () => date
+  });
+
+  if (type === 'student') {
+    return [
+      { 
+        id: 'demo-s-1', 
+        name: '김철수', 
+        gradeClass: '3학년 2반', 
+        reason: '친구들이 자꾸 저를 놀려서 학교 가기가 싫어요. 어떻게 해야 할지 모르겠어요.', 
+        status: '접수대기', 
+        createdAt: mockTimestamp(now),
+        peerRelation: 1, fatherRelation: 4, motherRelation: 5,
+        confidentiality: ['부모님', '담임 선생님']
+      },
+      { 
+        id: 'demo-s-2', 
+        name: '이영희', 
+        gradeClass: '6학년 1반', 
+        reason: '중학교 올라가는 게 너무 걱정돼요. 공부도 어렵고...', 
+        status: '상담완료', 
+        createdAt: mockTimestamp(yesterday),
+        peerRelation: 4, fatherRelation: 3, motherRelation: 3,
+        confidentiality: []
+      }
+    ];
+  } else if (type === 'parent') {
+    return [
+      {
+        id: 'demo-p-1',
+        childName: '박민수',
+        gradeClass: '1학년 3반',
+        relation: '엄마',
+        worries: '아이가 너무 산만하고 집중을 못하는 것 같아요. 집에서도 가만히 있지를 못합니다.',
+        desiredChange: '차분하게 앉아서 과제를 할 수 있으면 좋겠어요.',
+        contact: '010-1234-5678',
+        status: '접수대기',
+        createdAt: mockTimestamp(now)
+      }
+    ];
+  } else {
+    return [
+      {
+        id: 'demo-t-1',
+        studentName: '최동욱',
+        gradeClass: '4학년 5반',
+        referralReason: '수업 시간에 소리를 지르거나 돌아다니는 행동이 잦습니다. 친구들과의 다툼도 자주 발생합니다.',
+        desiredChange: '수업 규칙을 지키고 친구들과 원만하게 지내기를 바랍니다.',
+        status: '진행중',
+        createdAt: mockTimestamp(now)
+      }
+    ];
+  }
+};
 
 export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -35,10 +98,19 @@ export const AdminDashboard: React.FC = () => {
     setLoading(true);
     setData([]);
     setSelectedIds([]);
+
+    // 체험 모드 (DB 없음)
+    if (!db) {
+      setTimeout(() => {
+        setData(getMockData(activeTab));
+        setLoading(false);
+      }, 500);
+      return;
+    }
+
     try {
       const collectionName = `counseling_${activeTab}`;
       
-      // 최적화: 서버 측에서 최신순 정렬 및 50개 제한
       const q = query(
         collection(db, collectionName),
         orderBy('createdAt', 'desc'),
@@ -63,11 +135,24 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const handleLogout = async () => {
-    await signOut(auth);
+    if (auth) {
+      await signOut(auth);
+    } else {
+      sessionStorage.removeItem('demo_auth');
+    }
     navigate('/admin/login');
   };
 
   const handleUpdateStatus = async (id: string, newStatus: string) => {
+    // 체험 모드 처리
+    if (!db) {
+      setData(prev => prev.map(item => item.id === id ? { ...item, status: newStatus } : item));
+      if (selectedItem && selectedItem.id === id) {
+        setSelectedItem({ ...selectedItem, status: newStatus });
+      }
+      return;
+    }
+
     try {
       const collectionName = `counseling_${activeTab}`;
       await updateDoc(doc(db, collectionName, id), {
@@ -83,6 +168,14 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
+    // 체험 모드 처리
+    if (!db) {
+      setData(prev => prev.filter(item => item.id !== id));
+      setSelectedIds(prev => prev.filter(selectedId => selectedId !== id));
+      setSelectedItem(null);
+      return;
+    }
+
     try {
       const collectionName = `counseling_${activeTab}`;
       await deleteDoc(doc(db, collectionName, id));
@@ -114,6 +207,15 @@ export const AdminDashboard: React.FC = () => {
 
   const executeBulkDelete = async () => {
     if (selectedIds.length === 0) return;
+
+    // 체험 모드 처리
+    if (!db) {
+      setData(prev => prev.filter(item => !selectedIds.includes(item.id)));
+      setSelectedIds([]);
+      setShowBulkDeleteConfirm(false);
+      return;
+    }
+
     try {
       const collectionName = `counseling_${activeTab}`;
       await Promise.all(
@@ -168,14 +270,23 @@ export const AdminDashboard: React.FC = () => {
               </button>
             ))}
           </div>
-          <div className="flex gap-2">
-            <button onClick={() => setShowNotificationModal(true)} className="flex items-center gap-2 px-4 py-3 rounded-full font-bold bg-white text-indigo-500 border border-indigo-100 shadow-sm hover:bg-indigo-50 transition-colors">
-              <Bell size={18} /> <span className="text-sm">알림 설정</span>
-            </button>
-            <button onClick={() => setShowPasswordModal(true)} className="flex items-center gap-2 px-4 py-3 rounded-full font-bold bg-white text-slate-500 border border-slate-200 shadow-sm hover:bg-slate-100 transition-colors">
-              <Settings size={18} /> <span className="text-sm">비밀번호 설정</span>
-            </button>
-          </div>
+          
+          {/* 체험 모드에서는 설정 버튼 숨김 (DB 접근 불가하므로) */}
+          {db && (
+            <div className="flex gap-2">
+              <button onClick={() => setShowNotificationModal(true)} className="flex items-center gap-2 px-4 py-3 rounded-full font-bold bg-white text-indigo-500 border border-indigo-100 shadow-sm hover:bg-indigo-50 transition-colors">
+                <Bell size={18} /> <span className="text-sm">알림 설정</span>
+              </button>
+              <button onClick={() => setShowPasswordModal(true)} className="flex items-center gap-2 px-4 py-3 rounded-full font-bold bg-white text-slate-500 border border-slate-200 shadow-sm hover:bg-slate-100 transition-colors">
+                <Settings size={18} /> <span className="text-sm">비밀번호 설정</span>
+              </button>
+            </div>
+          )}
+          {!db && (
+             <div className="bg-amber-100 text-amber-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center">
+               ⚠️ 체험 모드 (데이터 저장 안됨)
+             </div>
+          )}
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm border border-slate-100 min-h-[500px]">

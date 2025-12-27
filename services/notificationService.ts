@@ -1,3 +1,4 @@
+
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { NotificationConfig } from '../types';
@@ -21,17 +22,24 @@ export const sendNotification = async (type: ApplicationType, data: any) => {
     let description = '';
     let color = 0; // Decimal color code
 
+    // Helper to safely get string
+    const safeStr = (val: any, limit: number = 200) => {
+      if (!val) return '내용 없음';
+      const str = String(val);
+      return str.length > limit ? str.substring(0, limit) + '...' : str;
+    };
+
     if (type === 'student') {
       title = '😊 학생 상담 신청이 도착했습니다!';
-      description = `**이름:** ${data.name}\n**학년/반:** ${data.gradeClass}\n**신청 사유:** ${data.reason.substring(0, 100)}${data.reason.length > 100 ? '...' : ''}`;
+      description = `**이름:** ${safeStr(data.name)}\n**학년/반:** ${safeStr(data.gradeClass)}\n**신청 사유:** ${safeStr(data.reason)}`;
       color = 3447003; // Blue
     } else if (type === 'parent') {
       title = '🏠 학부모 상담 신청이 도착했습니다!';
-      description = `**자녀 이름:** ${data.childName}\n**신청자:** ${data.relation}\n**연락처:** ${data.contact}\n**걱정되는 점:** ${data.worries.substring(0, 100)}${data.worries.length > 100 ? '...' : ''}`;
+      description = `**자녀 이름:** ${safeStr(data.childName)}\n**신청자:** ${safeStr(data.relation)}\n**연락처:** ${safeStr(data.contact)}\n**걱정되는 점:** ${safeStr(data.worries)}`;
       color = 15844367; // Amber/Yellow
     } else if (type === 'teacher') {
       title = '🏫 교사 상담 의뢰가 도착했습니다!';
-      description = `**학생 이름:** ${data.studentName}\n**학년/반:** ${data.gradeClass}\n**의뢰 사유:** ${data.referralReason.substring(0, 100)}${data.referralReason.length > 100 ? '...' : ''}`;
+      description = `**학생 이름:** ${safeStr(data.studentName)}\n**학년/반:** ${safeStr(data.gradeClass)}\n**의뢰 사유:** ${safeStr(data.referralReason)}`;
       color = 9327824; // Purple
     }
 
@@ -55,7 +63,9 @@ export const sendNotification = async (type: ApplicationType, data: any) => {
     const formData = new FormData();
     formData.append('payload_json', JSON.stringify(payload));
 
-    await fetch(config.webhookUrl, {
+    // console.log("Sending Discord Notification...", config.webhookUrl);
+
+    await fetch(config.webhookUrl.trim(), {
       method: 'POST',
       mode: 'no-cors', // 응답을 확인하지 않음으로써 CORS 차단을 우회합니다.
       body: formData,

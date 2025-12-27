@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Smile, Home, BookOpen, AlertCircle, Terminal, ExternalLink } from 'lucide-react';
+import { Smile, Home, BookOpen, AlertCircle, Terminal, ExternalLink, Eye } from 'lucide-react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { SelectionCard } from './components/SelectionCard';
@@ -14,7 +14,11 @@ import { RequireAuth } from './components/RequireAuth';
 import { CardConfig, UserRole } from './types';
 import { isFirebaseConfigured } from './firebase';
 
-const ConfigGuide: React.FC = () => (
+interface ConfigGuideProps {
+  onEnableDemo: () => void;
+}
+
+const ConfigGuide: React.FC<ConfigGuideProps> = ({ onEnableDemo }) => (
   <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
     <div className="max-w-2xl w-full bg-white rounded-[2.5rem] shadow-2xl shadow-blue-100 overflow-hidden animate-bounce-in">
       <div className="bg-amber-400 p-8 text-white flex items-center gap-4">
@@ -44,7 +48,6 @@ const ConfigGuide: React.FC = () => (
               <li className="text-blue-600">VITE_FIREBASE_MESSAGING_SENDER_ID</li>
               <li className="text-blue-600">VITE_FIREBASE_APP_ID</li>
             </ul>
-            {/* 수정됨: '>' 문자를 '&gt;'로 변경하여 빌드 에러 방지 */}
             <p className="text-sm text-slate-400 italic">* Firebase 콘솔의 '프로젝트 설정 &gt; 내 앱'에서 위 값들을 확인할 수 있습니다.</p>
           </div>
         </div>
@@ -63,7 +66,17 @@ const ConfigGuide: React.FC = () => (
             onClick={() => window.location.reload()} 
             className="flex-1 bg-blue-500 text-white font-bold py-4 rounded-2xl hover:bg-blue-600 transition-all shadow-lg shadow-blue-100"
           >
-            설정 완료 후 새로고침
+            새로고침
+          </button>
+        </div>
+        
+        <div className="pt-4 border-t border-slate-100 text-center">
+          <button 
+            onClick={onEnableDemo}
+            className="text-slate-400 hover:text-slate-600 text-sm font-bold flex items-center justify-center gap-2 mx-auto transition-colors"
+          >
+            <Eye size={16} />
+            개발용: UI 미리보기 (데이터 저장 안됨)
           </button>
         </div>
       </div>
@@ -71,7 +84,12 @@ const ConfigGuide: React.FC = () => (
   </div>
 );
 
-const LandingPage: React.FC = () => {
+interface LandingPageProps {
+  demoMode: boolean;
+  onEnableDemo: () => void;
+}
+
+const LandingPage: React.FC<LandingPageProps> = ({ demoMode, onEnableDemo }) => {
   const cards: CardConfig[] = [
     {
       role: UserRole.STUDENT,
@@ -99,17 +117,22 @@ const LandingPage: React.FC = () => {
     }
   ];
 
-  if (!isFirebaseConfigured) {
-    return <ConfigGuide />;
+  if (!isFirebaseConfigured && !demoMode) {
+    return <ConfigGuide onEnableDemo={onEnableDemo} />;
   }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 md:p-12 relative overflow-hidden">
+      {demoMode && (
+        <div className="absolute top-0 left-0 w-full bg-slate-800 text-white text-center py-2 text-xs font-bold z-50">
+          ⚠️ 현재 데모 모드입니다. (데이터가 저장되지 않음)
+        </div>
+      )}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
       <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-yellow-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
       <div className="absolute bottom-[-20%] left-[20%] w-96 h-96 bg-pink-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-4000"></div>
 
-      <div className="w-full max-w-6xl z-10">
+      <div className="w-full max-w-6xl z-10 mt-6">
         <Header />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 lg:gap-12 px-4 md:px-0">
           {cards.map((card) => (
@@ -126,18 +149,32 @@ const LandingPage: React.FC = () => {
 };
 
 const App: React.FC = () => {
+  // 데모 모드 상태 추가 (Preview 환경에서 UI 확인용)
+  const [demoMode, setDemoMode] = useState(false);
+  
+  // 실제 Firebase가 연결되었거나, 데모 모드일 때 접근 허용
+  const isAccessible = isFirebaseConfigured || demoMode;
+
   return (
     <HashRouter>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/student/apply" element={isFirebaseConfigured ? <StudentForm /> : <Navigate to="/" />} />
-        <Route path="/parent/apply" element={isFirebaseConfigured ? <ParentForm /> : <Navigate to="/" />} />
-        <Route path="/teacher/apply" element={isFirebaseConfigured ? <TeacherForm /> : <Navigate to="/" />} />
-        <Route path="/admin/login" element={isFirebaseConfigured ? <AdminLogin /> : <Navigate to="/" />} />
+        <Route 
+          path="/" 
+          element={
+            <LandingPage 
+              demoMode={demoMode} 
+              onEnableDemo={() => setDemoMode(true)} 
+            />
+          } 
+        />
+        <Route path="/student/apply" element={isAccessible ? <StudentForm /> : <Navigate to="/" />} />
+        <Route path="/parent/apply" element={isAccessible ? <ParentForm /> : <Navigate to="/" />} />
+        <Route path="/teacher/apply" element={isAccessible ? <TeacherForm /> : <Navigate to="/" />} />
+        <Route path="/admin/login" element={isAccessible ? <AdminLogin /> : <Navigate to="/" />} />
         <Route 
           path="/admin/dashboard" 
           element={
-            isFirebaseConfigured ? (
+            isAccessible ? (
               <RequireAuth>
                 <AdminDashboard />
               </RequireAuth>
