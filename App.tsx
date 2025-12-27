@@ -44,7 +44,8 @@ const ConfigGuide: React.FC = () => (
               <li className="text-blue-600">VITE_FIREBASE_MESSAGING_SENDER_ID</li>
               <li className="text-blue-600">VITE_FIREBASE_APP_ID</li>
             </ul>
-            <p className="text-sm text-slate-400 italic">* Firebase 콘솔의 '프로젝트 설정 > 내 앱'에서 위 값들을 확인할 수 있습니다.</p>
+            {/* 수정됨: '>' 문자를 '&gt;'로 변경하여 빌드 에러 방지 */}
+            <p className="text-sm text-slate-400 italic">* Firebase 콘솔의 '프로젝트 설정 &gt; 내 앱'에서 위 값들을 확인할 수 있습니다.</p>
           </div>
         </div>
 
