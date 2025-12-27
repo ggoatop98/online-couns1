@@ -1,8 +1,8 @@
-import firebase from "firebase/compat/app";
-import "firebase/compat/auth";
+import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
-// Your web app's Firebase configuration
+// Vite 환경 변수 사용 (실제 배포 시 .env 파일에 작성 권장)
 const firebaseConfig = {
   apiKey: "AIzaSyB0O5_qnShmO0ayvapEMLLou9-tFE9gzN4",
   authDomain: "online-couns.firebaseapp.com",
@@ -13,6 +13,6 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = firebase.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
-export const auth = firebase.auth();
+export const auth = getAuth(app);
